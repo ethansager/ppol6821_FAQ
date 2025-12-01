@@ -27,14 +27,19 @@ This document provides answers to common questions and issues experienced when t
 
 **Q: My model performs well on training data but poorly on validation/test data. What's wrong?**
 
+A: Try revisiting your pre-processing steps. In pytorch, this would be the torchvision.transforms. Here, you can try a wide range of combinations of random flips, rotations, inverts, cropps, blackouts and color adjustments. The most important part, however, is the actual normalization of mean and standard deviation. If you are working on images, don't forget to run the tensor transformation in this step as well.
 
 ### Underfitting
 
 **Q: My model performs poorly on both training and validation data. What should I do?**
 
+A: Try to increase model your architecure, the current one may not be complex enough. However, it can also be a sign of gradient collaps. In the context of CNNs, for example, introducing a weight initalization as part of the architecture enures the weight are loaded correctly. During gradient/model collaps, a model that should show moderately high accuracy, can indicate single digit accuracy.;
+
 ### Vanishing Gradients
 
 **Q: My deep network trains very slowly or stops improving after a few epochs. What's happening?**
+
+A: You can try to introduce a different activcation function, such as ReLU. Additionally, implementing Batch Normalization can be helpful.
 
 ### Exploding Gradients
 
@@ -45,6 +50,8 @@ A: You're experiencing exploding gradients, where gradients become too large dur
 ### Slow Training
 
 **Q: My model takes too long to train. How can I speed it up?**
+
+A: Even if everything is done correctly, this can be a standard issue. Your model may just we way too deep and complex for the local machine you are using. If possible, you can move the script into Google Colab and use the GPUs, which speed up training time compared to a local CPU. If still slow, try creating local Drive copies of your paths. The setup will take some time and you will have to set it up each time you connect to a GPU, but it will further speed up training time.
 
 ### Loss Not Decreasing
 
@@ -58,9 +65,13 @@ A: You're experiencing exploding gradients, where gradients become too large dur
 
 **Q: What are common mistakes in data loading and preprocessing?**
 
+A: Not running a normalization step is the biggest issue in pre-processing. If you work with images, don't forget the Tensor transformation as well. For data-loading, this depends on your context. If you designed your own DataLoader function, try adjusting the batch size and make sure you set Shuffle=True for the training set.
+
 ### Model Architecture
 
 **Q: How do I choose the right model architecture?**
+
+A: There is no right architectre, this depends on your context, use case and objectives. As a rule of thumb, design a minimum model first, then an all-out maximum model and inspect results and training times. Then, converge on something in between.
 
 ### Hyperparameter Tuning
 
@@ -94,6 +105,8 @@ set_seed(42)
 
 ### General Debugging Strategy
 
+### Including lots of print() statements will increase visibility of your code and give you insights into what's happening. Especially usefull when designing large loops.
+
 ### Common Debugging Commands
 
 ```python
@@ -110,7 +123,10 @@ print(f"Output shape: {y.shape}")
 
 ## Best Practices
 
+
 ### Code Organization
+
+### Really depends on the individual. A generally adopted approach is to divide your code into meaningful chunks, if e.g. in jupyer notebooks. This helps to distinguish steps from each other and makes it easier to rerun and debug issues. 
 
 ### Documentation and Tracking
 
