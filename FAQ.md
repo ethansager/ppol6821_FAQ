@@ -16,6 +16,7 @@ This document provides answers to common questions and issues experienced when t
   - [Hyperparameter Tuning](#hyperparameter-tuning)
   - [Memory Issues](#memory-issues)
   - [Reproducibility](#reproducibility)
+  - [NaN issues](#nan-issues)
 - [Debugging Tips](#debugging-tips)
 - [Best Practices](#best-practices)
 
@@ -71,7 +72,7 @@ A: Not running a normalization step is the biggest issue in pre-processing. If y
 
 **Q: How do I choose the right model architecture?**
 
-A: There is no right architectre, this depends on your context, use case and objectives. As a rule of thumb, design a minimum model first, then an all-out maximum model and inspect results and training times. Then, converge on something in between.
+A: There is no right architecture, this depends on your context, use case and objectives. As a rule of thumb, design a minimum model first, then an all-out maximum model and inspect results and training times. Then, converge on something in between.
 
 ### Hyperparameter Tuning
 
@@ -99,13 +100,20 @@ def set_seed(seed=42):
 
 set_seed(42)
 ```
+
+### NaN Issues
+
+**I am getting NaN errors during the training phase. What's going on?**
+
+A: NaN means you have missing data. For example, if you are training a CNN model and have a single observation with a missing value for one variable, your model will result in an NaN error. You can use a variety of tools to identify missingness across your variables to find the culprit. For an LSTM model, you have options such as imputation to fill in missing values, but your decisions need to be grounded in theory, best practice, etc.
+
 ---
 
 ## Debugging Tips
 
 ### General Debugging Strategy
 
-### Including lots of print() statements will increase visibility of your code and give you insights into what's happening. Especially usefull when designing large loops.
+### Including lots of print() statements will increase visibility of your code and give you insights into what's happening. Especially useful when designing large loops.
 
 ### Common Debugging Commands
 
@@ -153,4 +161,4 @@ print(f"Output shape: {y.shape}")
 
 **Contributing**: Please submit a pull request or open an issue.
 
-**Last Updated**: October 2025
+**Last Updated**: December 2025
