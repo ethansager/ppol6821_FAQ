@@ -28,7 +28,20 @@ This document provides answers to common questions and issues experienced when t
 
 **Q: My model performs well on training data but poorly on validation/test data. What's wrong?**
 
-A: Try revisiting your pre-processing steps. In pytorch, this would be the torchvision.transforms. Here, you can try a wide range of combinations of random flips, rotations, inverts, cropps, blackouts and color adjustments. The most important part, however, is the actual normalization of mean and standard deviation. If you are working on images, don't forget to run the tensor transformation in this step as well.
+A: Try revisiting your pre-processing steps. In pytorch, this would be the torchvision.transforms. Here, you can try a wide range of combinations of random flips, rotations, inverts, crops, blackouts and color adjustments. The most important part, however, is the actual normalization of mean and standard deviation. If you are working on images, don't forget to run the tensor transformation in this step as well.
+
+**Q: What are some strategies to prevent overfitting?**
+
+A: Strategies to prevent overfitting can be data-delated, model-related, or training-related.
+
+**Preventing overfitting through your data:**
+Try increasing the size of your training data. Having large data with a good amount of variation improves the model’s ability to learn patterns. One possibility for increasing the size of the training data is data augmentation. You can create artificial data that increases the size of your dataset and adds more variation. 
+
+**Preventing overfitting through your model:**
+First, add or increase dropout. Dropout randomly turns off a percentage of neurons during training, forcing the network to learn the most important features. Second, reduce model complexity by removing layers or the number of neurons in each layer. Complex models are more likely to experience overfitting. Third, use regularization. L1 and L2 regularization penalizes the loss function more for larger weights, helping to simplify the model.
+
+**Preventing overfitting through training process:**
+First, implement early stopping. This will stop training when the validation loss starts to increase. Second, utilize cross-validation, which mimics the validation step by testing the model on unseen subsets of the data.
 
 ### Underfitting
 
@@ -40,19 +53,28 @@ A: Try to increase model your architecure, the current one may not be complex en
 
 **Q: My deep network trains very slowly or stops improving after a few epochs. What's happening?**
 
-A: You can try to introduce a different activcation function, such as ReLU. Additionally, implementing Batch Normalization can be helpful.
+A: You’re experiencing vanishing gradients. This is a problem where the gradients become extremely small as they undergo backpropagation during training. This causes slow tuning of the weights in the early layers, preventing learning and halting the training process.
+
+**Q: How can I solve the problem of vanishing gradients?**
+
+A: If you are using sigmoid or tanh activation functions, consider alternatives. The derivatives of these functions are small, which can lead to vanishing gradients when used across many layers. You can try to introduce a different activation function, such as ReLU. Additionally, implementing Batch Normalization can be helpful.
 
 ### Exploding Gradients
 
 **Q: My loss becomes NaN or extremely large during training. What's the issue?**
 
-A: You're experiencing exploding gradients, where gradients become too large during backpropagation.
+A: You're experiencing exploding gradients, where gradients become too large during backpropagation. This happens when the product of many derivatives grows exponentially during backpropagation. The model fails to converge and parameters turn into NaN (not a number) because they are too large.
+
+**Q: How can I solve the problem of exploding gradients?**
+
+A: Gradient clipping is the most common solution. It sets a maximum threshold for the gradients. L1 or L2 regularization penalizes large weights, which can also help the problem of exploding gradients. You can also consider changing your architecture. LSTM networks have mechanisms that help resolve the problem when using sequential data.
+
 
 ### Slow Training
 
 **Q: My model takes too long to train. How can I speed it up?**
 
-A: Even if everything is done correctly, this can be a standard issue. Your model may just we way too deep and complex for the local machine you are using. If possible, you can move the script into Google Colab and use the GPUs, which speed up training time compared to a local CPU. If still slow, try creating local Drive copies of your paths. The setup will take some time and you will have to set it up each time you connect to a GPU, but it will further speed up training time.
+A: Even if everything is done correctly, this can be a standard issue. Your model may just be way too deep and complex for the local machine you are using. If possible, you can move the script into Google Colab and use the GPUs, which speed up training time compared to a local CPU. If still slow, try creating local Drive copies of your paths. The setup will take some time and you will have to set it up each time you connect to a GPU, but it will further speed up training time.
 
 ### Loss Not Decreasing
 
@@ -134,7 +156,7 @@ print(f"Output shape: {y.shape}")
 
 ### Code Organization
 
-### Really depends on the individual. A generally adopted approach is to divide your code into meaningful chunks, if e.g. in jupyer notebooks. This helps to distinguish steps from each other and makes it easier to rerun and debug issues. 
+Really depends on the individual. A generally adopted approach is to divide your code into meaningful chunks, if e.g. in jupyer notebooks. This helps to distinguish steps from each other and makes it easier to rerun and debug issues. 
 
 ### Documentation and Tracking
 
