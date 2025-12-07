@@ -88,7 +88,58 @@ A: Even if everything is done correctly, this can be a standard issue. Your mode
 
 **Q: What are common mistakes in data loading and preprocessing?**
 
-A: Not running a normalization step is the biggest issue in pre-processing. If you work with images, don't forget the Tensor transformation as well. For data-loading, this depends on your context. If you designed your own DataLoader function, try adjusting the batch size and make sure you set Shuffle=True for the training set.
+**A:** Not running a normalization step is the biggest issue in pre-processing. If you work with images, don't forget the Tensor transformation as well. For data-loading, this depends on your context. If you designed your own DataLoader function, try adjusting the batch size and make sure you set `shuffle=True` for the training set.
+
+**Additional common mistakes:**
+- **Memory leaks**: Check that you're not accumulating gradients unintentionally (use `with torch.no_grad()` during validation/testing)
+- **Data leakage**: Ensure your normalization statistics (mean/std) are computed only on the training set, then applied to validation/test sets
+- **Inconsistent preprocessing**: Apply the exact same transformations during training and inference (except data augmentation)
+- **Wrong data types**: Verify that your inputs are `float32` and labels match your loss function requirements (e.g., `long` for CrossEntropyLoss)
+- **num_workers issues**: If using multiple workers in DataLoader, start with `num_workers=0` to debug, then increase for performance
+- **Incorrect batch dimensions**: Check that your input shape matches what the model expects (e.g., `[batch_size, channels, height, width]` for CNNs)
+
+**Q: My training is very slow. Could this be a data loading issue?**
+
+**A:** First, make sure you've enabled GPU in Colab (`Runtime > Change runtime type > GPU`). If you're already using GPU but training is still slow, then data loading could be the issue. Check if your GPU is underutilized:
+```python
+# In Colab, check GPU usage
+!nvidia-smi
+```
+
+If GPU utilization is low (<50%), try these Colab-specific solutions:
+- **Increase batch size**: Colab GPUs have good memory; try `batch_size=64` or `128`
+- **Use `pin_memory=True`**: Speeds up CPU-to-GPU transfer
+- **Keep `num_workers=2`**: Colab has limited CPU cores, so higher values (4-8) may actually slow things down or cause crashes. Start with 2.
+- **Load data**: If using Google Drive, copy datasets to Colab's local storage first:
+```python
+# Copy from Drive to local (much faster)
+!cp -r /content/drive/MyDrive/dataset /content/dataset
+
+# Then load from local path
+train_dataset = YourDataset('/content/dataset')
+```
+
+- **Avoid slow transformations**: Heavy augmentations on CPU can bottleneck, so consider simpler transforms or pre-augment your data
+
+**Optimal Colab DataLoader setup:**
+```python
+train_loader = DataLoader(dataset, 
+                         batch_size=64,      # Larger for Colab GPUs
+                         shuffle=True,
+                         num_workers=2,       # Lower for Colab
+                         pin_memory=True)
+```
+
+**Note**: If training is still slow after GPU is enabled, it might be your model architecture, not data loading.
+
+**Q: Should I shuffle my validation and test sets?**
+
+**A:** No, always set `shuffle=False` for validation and test sets. Shuffling can:
+- Make debugging harder (non-reproducible results)
+- Complicate tracking of specific samples
+- Waste computation (unnecessary randomization)
+
+The only dataset that should have `shuffle=True` is your training set, to prevent the model from learning order-dependent patterns.
 
 ### Model Architecture
 
@@ -160,10 +211,27 @@ Really depends on the individual. A generally adopted approach is to divide your
 
 ### Documentation and Tracking
 
+Keep a simple log of your experiments so you remember what you tried. This can be as simple as comments in your notebook or a text file tracking hyperparameters and results. Save your models with descriptive names that include key info like learning rate and accuracy (e.g., `model_lr001_acc85.pth` instead of `final_model.pth`). If working in a team, add a brief README explaining what your model does, what dataset you used, and how to run the code.
+
 ### Performance Optimization
 
+Start simple and optimize only when needed. Common ways to speed up training are to increase the batch size if you have GPU memory available, use mixed precision training with `torch.cuda.amp` to reduce memory usage and speed up computation, and ensure you're using GPU (not CPU) for training. For data loading, use `num_workers=2` and `pin_memory=True` in your DataLoader. If your model is too large for GPU memory, try reducing batch size, using gradient accumulation, or simplifying your architecture. A slightly slower but working model is better than an over-optimized one you can't debug.
+
 ### Common Pitfalls to Avoid
----
+
+**Not using `model.eval()` during validation/testing:** This keeps dropout and batch normalization in training mode, giving incorrect results. Always use `model.eval()` before validation and `model.train()` before training.
+
+**Forgetting `torch.no_grad()` during inference:** This wastes memory by tracking gradients you don't need. Wrap validation/test code with `with torch.no_grad():` to save memory.
+
+**Training on unnormalized data:** Your model will struggle to converge. Always better to normalize inputs (e.g., to mean=0, std=1 for images).
+
+**Not shuffling training data:** Set `shuffle=True` in your training DataLoader, otherwise your model might learn patterns based on data order rather than actual features.
+
+**Using test data too early:** Never change your test set until final evaluation. Use it once to report final results - if you tune based on test performance, you're overfitting to the test set.
+
+**Ignoring validation loss:** If training loss decreases but validation loss increases, you're overfitting. Stop training or add regularization (dropout, weight decay).
+
+**Copy-pasting code without understanding:** Take time to understand what each line does. This makes debugging much easier when things break.
 
 ## Additional Resources
 
