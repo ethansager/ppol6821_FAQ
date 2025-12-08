@@ -76,6 +76,23 @@ A: Gradient clipping is the most common solution. It sets a maximum threshold fo
 
 A: Even if everything is done correctly, this can be a standard issue. Your model may just be way too deep and complex for the local machine you are using. If possible, you can move the script into Google Colab and use the GPUs, which speed up training time compared to a local CPU. If still slow, try creating local Drive copies of your paths. The setup will take some time and you will have to set it up each time you connect to a GPU, but it will further speed up training time.
 
+You can go about making the copies in two ways either make either in bash or in python
+```bash
+# Copy folder from Drive
+!mkdir -p Dogs
+!cp -r "/content/drive/MyDrive/Dogs" Dogs
+```
+
+```python
+import shutil
+import os
+# Copy folder from Drive 
+src = "/content/drive/MyDrive/Dogs"
+dst = "/content/Dogs"
+os.mkdir(dst)
+shutil.copytree(src, dst, dirs_exist_ok=True)
+```
+
 ### Loss Not Decreasing
 
 **Q: My loss isn't decreasing at all. What could be wrong?**
