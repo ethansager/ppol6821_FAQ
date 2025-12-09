@@ -230,9 +230,13 @@ Really depends on the individual. A generally adopted approach is to divide your
 
 Keep a simple log of your experiments so you remember what you tried. This can be as simple as comments in your notebook or a text file tracking hyperparameters and results. Save your models with descriptive names that include key info like learning rate and accuracy (e.g., `model_lr001_acc85.pth` instead of `final_model.pth`). If working in a team, add a brief README explaining what your model does, what dataset you used, and how to run the code.
 
+Finally, combine documentation with periodic checkpoints during training. Saving intermediate models lets you recover from crashes, compare different training stages, and experiment with fine-tuning or early stopping without starting from scratch. Good documentation and tracking practices make your workflow more efficient, reliable, and collaborative.
+
 ### Performance Optimization
 
-Start simple and optimize only when needed. Common ways to speed up training are to increase the batch size if you have GPU memory available, use mixed precision training with `torch.cuda.amp` to reduce memory usage and speed up computation, and ensure you're using GPU (not CPU) for training. For data loading, use `num_workers=2` and `pin_memory=True` in your DataLoader. If your model is too large for GPU memory, try reducing batch size, using gradient accumulation, or simplifying your architecture. A slightly slower but working model is better than an over-optimized one you can't debug.
+Start simple and optimize only when needed. Common ways to speed up training are to increase the batch size if you have GPU memory available, use mixed precision training with `torch.cuda.amp` to reduce memory usage and speed up computation, and ensure you're using GPU (not CPU) for training. For data loading, use `num_workers=2` and `pin_memory=True` in your DataLoader. If your model is too large for GPU memory, try reducing batch size, using gradient accumulation, or simplifying your architecture. A slightly slower but working model is better than an over-optimized one you can't debug. 
+
+Overall, performance optimization works best when approached gradually: start with a clean, simple pipeline, then optimize only the steps that have the biggest impact.
 
 ### Common Pitfalls to Avoid
 
