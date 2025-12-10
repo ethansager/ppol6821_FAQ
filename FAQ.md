@@ -174,7 +174,7 @@ A: There is no right architecture, this depends on your context, use case and ob
 
 **Q: My results vary between runs. How can I ensure reproducibility?**
 
-A: Random seeds and environment factors affect reproducibility.
+A: The first thing you would want to check is that you are properly implementing seeds. Computers are not really random and must be given a starting point in which they build from this is what a seed does. Random seeds and environment factors affect reproducibility, it is reccomended not to use something that is particular to you say your birthday etc https://www.random.org/ can help with coming up with seeds. You can see some code how to implement this below. The second issue you may have espeically with notebooks is the order of code execution always check before training that you can run the code up till this point in a single call that makes sure you are not operating on a object that can not be reproduced. 
 
 **Solution:**
 ```python
@@ -191,8 +191,13 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = False
 
 set_seed(42)
-```
 
+# or in keras
+import keras
+keras.utils.set_random_seed(42)
+
+```
+see: https://keras.io/examples/keras_recipes/reproducibility_recipes/ if you want more technical explantion. 
 ### NaN Issues
 
 **I am getting NaN errors during the training phase. What's going on?**
@@ -263,19 +268,14 @@ Overall, performance optimization works best when approached gradually: start wi
 ## Additional Resources
 
 ### Learning Materials
-- [Deep Learning Book](https://www.deeplearningbook.org/) by Goodfellow, Bengio, and Courville
+- [Deep Learning Book](https://www.manning.com/books/deep-learning-with-python-second-edition)
 - [PyTorch Tutorials](https://pytorch.org/tutorials/)
 - [TensorFlow Tutorials](https://www.tensorflow.org/tutorials)
 - [Fast.ai Course](https://course.fast.ai/)
 
 ### Tools and Libraries
 - **PyTorch**: Popular deep learning framework
-- **TensorFlow/Keras**: Alternative framework
-
-### Communities
-
----
-
-**Contributing**: Please submit a pull request or open an issue.
+- **TensorFlow**: Alternative framework
+- **Keras**: This is what was mostly used in class
 
 **Last Updated**: December 2025
