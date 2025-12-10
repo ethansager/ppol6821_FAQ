@@ -106,6 +106,35 @@ A: If the loss is vibrating heavily but not decreasing, check the learning rate 
 
 ### Data Loading
 
+**Q: How can I get access to a massive external database on HuggingFace?**
+**A:** Actually accessing a dataset from an external database is unfortunately not as simple as just loading it in or directly streaming it without first accessing the platform; without going through the proper channels, your connection will not be allowed by the platform or may be extremely memory intensive. There are a few considerations to make here:
+1) Prior to calling the dataset, you must first create a login on HuggingFace’s platform, and then create an ‘access token’. This will give you an access key with a name and passcode that are visible to you a single time. If using Google Colab, you can input them in the ‘secrets tab’ (denoted with a key symbol) in the workbook you’re working out of. From here, you can input the following code to complete this connection:
+```python
+from google.colab import userdata
+from huggingface_hub import login
+
+
+# Retrieve the Hugging Face token from Colab secrets
+hf_token = userdata.get('HF_TOKEN')
+
+
+# Login to Hugging Face Hub programmatically
+if hf_token:
+    login(token=hf_token)
+    print("Hugging Face token configured successfully.")
+else:
+    print("HF_TOKEN not found in Colab secrets. Please add it.")
+```
+2) Loading the entirety of a massive dataset can cause memory errors and large loading times; as such, streaming the data is a more memory-efficient solution, as it fetches data on demand rather than loading everything in regardless of available memory.
+```python
+try:
+            print("\n🔍 Attempting to load with streaming and smart filtering...") # Progress checker - notes that you’ve reached this stage
+            dataset_stream = load_dataset(
+                "[dataset title]",
+                streaming=True,
+                split='train'
+            )
+```
 **Q: What are common mistakes in data loading and preprocessing?**
 
 **A:** Not running a normalization step is the biggest issue in pre-processing. If you work with images, don't forget the Tensor transformation as well. For data-loading, this depends on your context. If you designed your own DataLoader function, try adjusting the batch size and make sure you set `shuffle=True` for the training set.
@@ -299,7 +328,17 @@ print(f"Input shape: {x.shape}")
 print(f"Output shape: {y.shape}")
 
 ```
+**Q: I’m not sure where my code is breaking, or if it’s hitting all the implementation stages – how can I check the progress of my code?**
 
+Because streaming is incremental, it’s important to provide yourself sanity checks to make sure you’re aware of what stage you’re at. Part of this is the aforementioned code organization technique; in addition, it’s helpful to use print statements at specific moments so you have a sense of what stage your code has reached. For example, if you’re streaming a lot of data, having print statements output at specific intervals so you know how much data has been processed at any given time allows better transparency than would otherwise be granted –
+
+```python
+for record in dataset_stream:
+                total_checked += 1
+                # Progress update
+                if total_checked % 10000 == 0: # Note assuming your data is greater than 10,000
+                    print(f"  Checked: {total_checked:,}")
+```
 ---
 
 ## Best Practices
