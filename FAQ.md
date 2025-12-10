@@ -28,7 +28,9 @@ This document provides answers to common questions and issues experienced when t
 
 **Q: My model performs well on training data but poorly on validation/test data. What's wrong?**
 
-A: Try revisiting your pre-processing steps. In pytorch, this would be the torchvision.transforms. Here, you can try a wide range of combinations of random flips, rotations, inverts, crops, blackouts and color adjustments. The most important part, however, is the actual normalization of mean and standard deviation. If you are working on images, don't forget to run the tensor transformation in this step as well.
+A: Try revisiting your pre-processing steps. In pytorch, this would be the torchvision. transforms. Here, you can try a wide range of combinations of random flips, rotations, inverts, crops, blackouts and color adjustments. The most important part, however, is the actual normalization of mean and standard deviation. If you are working on images, don't forget to run the tensor transformation in this step as well.
+
+Also, overly complex models could negatively affect your fitness instead. For instance, try to use fewer units when designing an LSTM network if you find significant overfitting. Or, if using CNN on pictures, too many convolutional layers/filters/dense layers would also lead to overfitting instead of precision. So when overfitting occurs, playing around with the complexity of the model is sometimes a good way to start.
 
 **Q: What are some strategies to prevent overfitting?**
 
@@ -97,7 +99,7 @@ shutil.copytree(src, dst, dirs_exist_ok=True)
 
 **Q: My loss isn't decreasing at all. What could be wrong?**
 
----
+A: If the loss is vibrating heavily but not decreasing, check the learning rate first. Turbulent, non-converging loss is probably due to a high learning rate. You may also consider using AdamW instead of Adam or SGD as the optimizer for more stable loss convergence. You may also check your model design to see whether you need a deeper network with larger batch sizes, more filters, layers, and residual connectors.
 
 ## Implementation Issues
 
@@ -247,6 +249,10 @@ Start simple and optimize only when needed. Common ways to speed up training are
 **Using test data too early:** Never change your test set until final evaluation. Use it once to report final results - if you tune based on test performance, you're overfitting to the test set.
 
 **Ignoring validation loss:** If training loss decreases but validation loss increases, you're overfitting. Stop training or add regularization (dropout, weight decay).
+
+**Too complex models:** Run some experiments and seek the optimal complexity and depth for your model to prevent overfitting. High complexity is not always (always not) a good thing.
+
+**Changing working environment:** If you need something like a portable SSD to work on multiple devices, remember to make sure the environment is built on the SSD and the drive letter is the same on all devices you would work on.
 
 **Copy-pasting code without understanding:** Take time to understand what each line does. This makes debugging much easier when things break.
 
