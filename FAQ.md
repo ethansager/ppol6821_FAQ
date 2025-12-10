@@ -17,7 +17,7 @@ This document provides answers to common questions and issues experienced when t
   - [Memory Issues](#memory-issues)
   - [Reproducibility](#reproducibility)
   - [NaN issues](#nan-issues)
-- [Metrics] (#metrics)
+- [Metrics](#metrics)
 - [Debugging Tips](#debugging-tips)
 - [Best Practices](#best-practices)
 
