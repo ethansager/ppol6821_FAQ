@@ -17,6 +17,7 @@ This document provides answers to common questions and issues experienced when t
   - [Memory Issues](#memory-issues)
   - [Reproducibility](#reproducibility)
   - [NaN issues](#nan-issues)
+- [Metrics] (#metrics)
 - [Debugging Tips](#debugging-tips)
 - [Best Practices](#best-practices)
 
@@ -198,6 +199,81 @@ set_seed(42)
 A: NaN means you have missing data. For example, if you are training a CNN model and have a single observation with a missing value for one variable, your model will result in an NaN error. You can use a variety of tools to identify missingness across your variables to find the culprit. For an LSTM model, you have options such as imputation to fill in missing values, but your decisions need to be grounded in theory, best practice, etc.
 
 ---
+
+## Metrics
+
+**Q. In my classification model, I feel like loss and accuracy aren't giving me the full picture. What else can I look at to judge how my model would fare depending on my intended use case?**
+
+### Accuracy
+The most common metric evaluating ML and NN classification models, accuracy simply tells us how often the model is 'right' out of all its predictions. Formally,
+
+$\text{Accuracy} = \frac{\text{Number of correct predictions}}{\text{Number of total predictions}}$ 
+
+For two-class classification:
+
+$\text{Accuracy} = \frac{TP + TN}{TP + TN + FP +FN}$
+
+For multi-class classification, each class has its own accuracy relative to the rest. It can be worth looking at these individually, since a hight overall accuracy score can obscure poor performance on minority classes.
+
+Accuracy is popular because it's intuitive, but it doesn't always give the best sense of how a model will perform in its intended practical application. For instance a system meant to give a medical diagnosis of a serious condition, a false negative (someone who 'slips through the net' and doesn't receive the treatment they need) is a much bigger problem than a false positive (a healthy person flagged by the model). In a scenario where most of the subjects tested are healthy, false negatives can easily fly under the radar since they are only a small proportion of total predictions.
+
+### Recall / Sensitivity
+(These tems refer to the same thing, with sensitivity often preferred in medical contexts.)
+How many the actual positives did the model correctly identify?
+
+$\text{Recall} = \frac{\text{Number of correct positive predictions}}{\text{Number of positive samples}}$
+
+For two classes:
+
+$\text{Recall} = \frac{TP}{TP + FN}$
+
+Recall helps address the problem described above—the drowning out of false negatives. The system described above, which did well a sample with many negatives but missed proportionally more of the small number of positives, would score worse on recall than on accuracy.
+
+We use recall when the worst thing the model can do is leave out a positive we should have classified.
+
+### Precision
+How many of the model's positive predictions were correct?
+
+$\text{Recall} = \frac{\text{Number of correct positive predictions}}{\text{Total number of positive predictions}}$
+
+For two classes:
+
+$\text{Recall} = \frac{TP}{TP + FP}$
+
+Conversely to recall, precision should be our metric of choice when the worst thing the model can do is include a sample that shouldn't be included. The real-world drawbacks of over-inclusion often have to do with volume: if a system that flags possible fraudulent bank transactions for review gets almost every actual fraudulent transaction but forces human review for 50 legitimate transactions for every fraudulent one, there is probably some room for improvement.
+
+### F-1 and F-Beta
+It can be useful to have a single value that balances recall's focus on false negatives and precision's focus on false positive. The standard way of doing this by calculate the harmonic mean of precision and recall, also called the F1 score:
+
+$\text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + text{Recall}}$
+
+The F1 score gives equal importance to precision and recall. However, F1 is only one of a family of F-Beta scores that can vary the weight given to precision vs. recall based on the parameter $\beta$.
+
+$\text{F}_{\beta} = (1+\beta^2) \times \frac{\text{Precision} \times \text{Recall}}{( \beta^2 \times \text{Precision}) + \text{Recall}}$
+
+$\beta > 1$  gives more weight to precision, while $\beta < 1$  gives more weight to recall. F1 score is the version of F-Beta score when $\beta = 1$
+
+### Mean Reciprocal Rank (MRR)
+Many classification systems double as ranking systems. Their output is not simply yes/no, positive/negative; they are designed to produce an ordinal output of 'most positive' to 'most negative.' Classification metrics like accuracy, precision, and recall can be applied to a ranked output (more detail below), but it can be useful to zero in on a more detailed measure of how well the system ranks things. One common approach to evaluating a ranked output is mean reciprocal rank (MRR).
+
+Consider a classification system designed to classify items into relevant and irrelevant, such as a search engine or content recommender. The purpose of this system is to provide a user the most relevant items to a given query. In training, let us suppose that relevance is treated as binary: an item is either relevant or irrelevant. The intended output of the system is a ranked list with the items the system scores as most relevant at the top and least relevant at the bottom.
+
+With $J$ inputs of which $U$ are relevant, 
+
+$\mathrm{MRR}\;=\;\frac{1}{U}\sum_{u=1}^{U}\frac{1}{\mathrm{rank}_\mathrm{k}}$
+
+The higher the MRR is, the more highly the system tends to rank true relevant items.
+
+### Applying Classification Metrics to a Ranked Output
+It can also be useful to evaluate the traditional classification metrics discussed above in the context of a ranked output. Returning to the bank fraud example from earlier, if one of the system's goal is not to identify every example of fraud but to flag the 100 transactions that are most likely to be fraudulent out of 1000 total transactions, this constrained list of 100 becomes much more important to examine on its own.
+
+Accuracy, precision, and recall can all be calculated for the top $K$ items of a ranked output:
+
+$\mathrm{Accuracy}=\frac{\mathrm{true\ positives\ in\ top\ K}+\mathrm{true\ negatives\ rejected\ to\ produce\ top\ K}}{\mathrm{total\ candidates\ considered\ for\ top\ K}}$
+
+$\mathrm{Recall}=\frac{\mathrm{true\ positives\ in\ all\ top\ K}}{\mathrm{total\ positives}}$
+
+$\mathrm{Precision}=\frac{\mathrm{true\ positives\ in\ all\ top\ K}}{\mathrm{K}}$
 
 ## Debugging Tips
 
